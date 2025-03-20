@@ -159,24 +159,23 @@ try:
     st.caption(" ")  # Add a small caption for spacing
 
     # --- EMPLOYEE INFORMATION SECTION ---
-    col1, col2 = st.columns([1]) # Adjust the column ratio as needed
-    with col1:
-        with st.expander("Employee Information", expanded=False):  # Add expander
-            st.markdown("<h2 style='text-align: left;'>Employee Information</h2>", unsafe_allow_html=True)
-            #st.dataframe(filtered_df) # Original dataframe code
-            data_editor = st.data_editor(filtered_df) # Implemented the data editor
+    # REMOVE THE `st.columns` HERE
+    with st.expander("Employee Information", expanded=False):  # Add expander
+        st.markdown("<h2 style='text-align: left;'>Employee Information</h2>", unsafe_allow_html=True)
+        #st.dataframe(filtered_df) # Original dataframe code
+        data_editor = st.data_editor(filtered_df) # Implemented the data editor
 
-            st.write(f"Number of results: {len(filtered_df)}")
+        st.write(f"Number of results: {len(filtered_df)}")
 
-            # Add download button
-            csv = filtered_df.to_csv(index=False).encode('utf-8')
-            st.download_button(
-                "Download Filtered Data",
-                data=csv,
-                file_name="filtered_data.csv",
-                mime="text/csv",
-                key='download-csv'
-            )
+        # Add download button
+        csv = filtered_df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            "Download Filtered Data",
+            data=csv,
+            file_name="filtered_data.csv",
+            mime="text/csv",
+            key='download-csv'
+        )
 
 
 except FileNotFoundError:
