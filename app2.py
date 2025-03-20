@@ -2,44 +2,85 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 import numpy as np
-import scipy.stats as stats  # For correlation analysis
+import scipy.stats as stats
 
 # Set a wider default layout
 st.set_page_config(layout="wide")
 
-# Custom CSS for styling
+# --- Dark Mode Toggle ---
+if 'dark_mode' not in st.session_state:
+    st.session_state.dark_mode = False
+
+def toggle_dark_mode():
+    st.session_state.dark_mode = not st.session_state.dark_mode
+
+st.sidebar.button("Toggle Dark Mode", on_click=toggle_dark_mode)
+
+# --- Define Colors Based on Mode ---
+if st.session_state.dark_mode:
+    background_color = "#262730"  # Dark gray
+    text_color = "#FAFAFA"       # Light gray
+    sidebar_color = "#363740"     # Slightly lighter dark gray
+    accent_color = "#6495ED"      # Cornflower blue
+else:
+    background_color = "#FFFFFF"  # White
+    text_color = "#000000"       # Black
+    sidebar_color = "#D4E6F1"     # Light Blue
+    accent_color = "#2E86C1"      # Steel Blue
+
+# --- Custom CSS for styling ---
 st.markdown(
-    """
+    f"""
     <style>
-    .reportview-container .main .block-container{
+    .reportview-container .main .block-container{{
         max-width: 1200px;
-    }
-    h1 {
-        color: #2E86C1 !important; /* Steel Blue */
-    }
-    h2 {
-        color: #1A5276 !important; /* Dark Blue */
-    }
-    .stDataFrame {
+    }}
+    body {{
+        background-color: {background_color} !important;
+        color: {text_color} !important;
+    }}
+    h1, h2, h3, h4, h5, h6 {{
+        color: {accent_color} !important;
+    }}
+    .stDataFrame {{
         border: 1px solid #EBF4FA;
         border-radius: 5px;
         padding: 10px;
-        background-color: #F0F8FF; /* AliceBlue */
-    }
-    .streamlit-expanderHeader {
+        background-color: #F0F8FF;
+        color: {text_color} !important;
+    }}
+    .streamlit-expanderHeader {{
         font-size: 1.2em !important;
         font-weight: bold !important;
-    }
-    [data-testid="stSidebar"] {
-        background-color: #D4E6F1; /* Light Blue */
-    }
+        color: {text_color} !important;
+    }}
+    [data-testid="stSidebar"] {{
+        background-color: {sidebar_color} !important;
+        color: {text_color} !important; /* Sidebar text color */
+    }}
+    [data-testid="stSidebar"] p, [data-testid="stSidebar"] li, [data-testid="stSidebar"] ul, [data-testid="stSidebar"] ol{{
+        color: {text_color} !important;
+    }}
+    .css-1adrfps {{
+        color: {text_color}
+    }}
+    div.block-container.css-91a74f.egzxvld4{{
+        color: {text_color}
+    }}
+    .css-1n76uv {{
+        color: {text_color}
+    }}
+    .css-keje6w{{
+        color: {text_color} !important;
+    }}
+
     </style>
     """,
     unsafe_allow_html=True,
 )
 
 # Use Markdown/HTML to style the title
-st.markdown("<h1 style='color: green;'>Employee Data Filter</h1>", unsafe_allow_html=True)
+st.markdown(f"<h1 style='color: {accent_color};'>Employee Data Filter</h1>", unsafe_allow_html=True)
 
 @st.cache_data
 def load_data():
@@ -196,7 +237,7 @@ try:
     # --- EMPLOYEE INFORMATION SECTION ---
     with st.expander("Employee Information", expanded=False):
         st.markdown("<h2 style='text-align: left;'>Employee Information</h2>", unsafe_allow_html=True)
-        data_editor = st.data_editor(filtered_df) #Implemeneted the data editor
+        data_editor = st.data_editor(filtered_df)
 
         st.write(f"Number of results: {len(filtered_df)}")
 
