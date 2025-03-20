@@ -1,7 +1,8 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-import numpy as np  # Import NumPy
+import numpy as np
+import scipy.stats as stats  # For correlation analysis
 
 # Set a wider default layout
 st.set_page_config(layout="wide")
@@ -85,6 +86,9 @@ try:
             value=(min_salary, max_salary),
         )
 
+        # Text input for filtering by name or city
+        search_term = st.text_input("Search by Name or City:", "")
+
     # Filter the DataFrame
     filtered_df = df[
         (df["Category"].isin(selected_categories)) &
@@ -92,6 +96,16 @@ try:
         (df["Salary"] >= salary_range[0]) &
         (df["Salary"] <= salary_range[1])
     ]
+
+    # Filter by search term (name or city)
+    if search_term:
+        filtered_df = filtered_df[
+            (filtered_df["Name"].str.contains(search_term, case=False)) |
+            (filtered_df["City"].str.contains(search_term, case=False))
+        ]
+
+    # Dynamic Chart Title
+    chart_title_suffix = f" (Filtered)" if len(filtered_df) < len(df) else ""
 
     # Display metrics
     col1, col2 = st.columns(2)
@@ -113,16 +127,18 @@ try:
             x="Category",
             y="Salary",
             labels={"Category": "Employee Category", "Salary": "Average Salary ($)"},
-            title="Average Salary per Employee Category",
-            height=400  # Adjust height as needed
+            title=f"Average Salary per Employee Category{chart_title_suffix}",
+            height=400,
+            hover_data=["Salary"]  # Add Salary to hover data
         )
     elif chart_type == "Pie Chart":
         fig = px.pie(
             avg_salary_per_category,
             values="Salary",
             names="Category",
-            title="Average Salary per Employee Category",
-            height=400  # Adjust height as needed
+            title=f"Average Salary per Employee Category{chart_title_suffix}",
+            height=400,
+            hover_data=["Salary"]  # Add Salary to hover data
         )
     elif chart_type == "Scatter Chart":
         # Add Age to scatter chart
@@ -134,7 +150,7 @@ try:
            color="Category",
            hover_data=['Name', 'Age', 'City'],
            labels={"Category": "Employee Category", "Salary": "Salary ($)"},
-           title="Salary vs Category (Size: Age)",
+           title=f"Salary vs Category (Size: Age){chart_title_suffix}",
            height=400 # Adjust height as needed
        )
     elif chart_type == "Histogram":
@@ -142,7 +158,7 @@ try:
             filtered_df,
             x="Salary",
             nbins=20, # Adjust the number of bins as needed
-            title="Salary Distribution",
+            title=f"Salary Distribution{chart_title_suffix}",
             labels={"Salary": "Salary ($)"}
         )
     elif chart_type == "Box Plot":
@@ -151,19 +167,36 @@ try:
             x="Category",
             y="Salary",
             color="Category",
-            title="Salary Distribution by Category",
+            title=f"Salary Distribution by Category{chart_title_suffix}",
             labels={"Salary": "Salary ($)", "Category": "Employee Category"}
         )
 
     st.plotly_chart(fig, use_container_width=True)
     st.caption(" ")  # Add a small caption for spacing
 
+    # --- Correlation Analysis ---
+    st.subheader("Correlation Analysis")
+    numeric_columns = filtered_df.select_dtypes(include=np.number).columns.tolist() # Get numeric columns
+    if len(numeric_columns) > 1:
+        selected_columns = st.multiselect("Select columns for correlation analysis:", numeric_columns, default=numeric_columns[:2]) # select column
+        if len(selected_columns) >= 2:
+            correlation_matrix = filtered_df[selected_columns].corr(method='pearson') # generates the correlation value
+            fig_corr = px.imshow(correlation_matrix,
+                                  labels=dict(x="Columns", y="Columns", color="Correlation"),
+                                  x=selected_columns,
+                                  y=selected_columns,
+                                  color_continuous_scale="RdBu", # red-blue color scheme
+                                  title=f"Correlation Heatmap{chart_title_suffix}")
+            st.plotly_chart(fig_corr, use_container_width=True)
+        else:
+            st.warning("Please select at least two numeric columns for correlation analysis.")
+    else:
+        st.warning("No numeric columns found for correlation analysis.")
+
     # --- EMPLOYEE INFORMATION SECTION ---
-    # REMOVE THE `st.columns` HERE
-    with st.expander("Employee Information", expanded=False):  # Add expander
+    with st.expander("Employee Information", expanded=False):
         st.markdown("<h2 style='text-align: left;'>Employee Information</h2>", unsafe_allow_html=True)
-        #st.dataframe(filtered_df) # Original dataframe code
-        data_editor = st.data_editor(filtered_df) # Implemented the data editor
+        data_editor = st.data_editor(filtered_df) #Implemeneted the data editor
 
         st.write(f"Number of results: {len(filtered_df)}")
 
@@ -176,7 +209,6 @@ try:
             mime="text/csv",
             key='download-csv'
         )
-
 
 except FileNotFoundError:
     st.error("Error: data.csv not found.")
