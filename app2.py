@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import numpy as np  # Import NumPy
 
 # Set a wider default layout
 st.set_page_config(layout="wide")
@@ -39,8 +40,19 @@ st.markdown(
 # Use Markdown/HTML to style the title
 st.markdown("<h1 style='color: green;'>Employee Data Filter</h1>", unsafe_allow_html=True)
 
-try:
+@st.cache_data
+def load_data():
     df = pd.read_csv("data.csv")
+
+    # Data Validation: Check for NaNs in 'Salary' and handle them.
+    if df['Salary'].isnull().any():
+        st.warning("Warning: Missing values found in 'Salary' column.  Filling with the mean.")
+        df['Salary'] = df['Salary'].fillna(df['Salary'].mean())  # Fill with mean
+
+    return df
+
+try:
+    df = load_data()
 
     # Calculate summary metrics
     total_employees = len(df)
@@ -74,10 +86,11 @@ try:
         )
 
     # Filter the DataFrame
-    filtered_df = df[df["Category"].isin(selected_categories)]
-    filtered_df = filtered_df[df["Department"].isin(selected_departments)] # Added department filter
-    filtered_df = filtered_df[
-        (filtered_df["Salary"] >= salary_range[0]) & (filtered_df["Salary"] <= salary_range[1])
+    filtered_df = df[
+        (df["Category"].isin(selected_categories)) &
+        (df["Department"].isin(selected_departments)) &
+        (df["Salary"] >= salary_range[0]) &
+        (df["Salary"] <= salary_range[1])
     ]
 
     # Display metrics
@@ -96,12 +109,24 @@ try:
     with col1:
         with st.expander("Employee Information", expanded=False):  # Add expander
             st.markdown("<h2 style='text-align: left;'>Employee Information</h2>", unsafe_allow_html=True)
-            st.dataframe(filtered_df)
+            #st.dataframe(filtered_df) # Original dataframe code
+            data_editor = st.data_editor(filtered_df) # Implemented the data editor
+
             st.write(f"Number of results: {len(filtered_df)}")
+
+            # Add download button
+            csv = filtered_df.to_csv(index=False).encode('utf-8')
+            st.download_button(
+                "Download Filtered Data",
+                data=csv,
+                file_name="filtered_data.csv",
+                mime="text/csv",
+                key='download-csv'
+            )
 
     with col2:
         # Chart type selector
-        chart_type = st.selectbox("Select Chart Type:", ["Bar Chart", "Pie Chart", "Scatter Chart"])
+        chart_type = st.selectbox("Select Chart Type:", ["Bar Chart", "Pie Chart", "Scatter Chart", "Histogram", "Box Plot"])
 
         if chart_type == "Bar Chart":
             fig = px.bar(
@@ -133,6 +158,23 @@ try:
                title="Salary vs Category (Size: Age)",
                height=400 # Adjust height as needed
            )
+        elif chart_type == "Histogram":
+            fig = px.histogram(
+                filtered_df,
+                x="Salary",
+                nbins=20, # Adjust the number of bins as needed
+                title="Salary Distribution",
+                labels={"Salary": "Salary ($)"}
+            )
+        elif chart_type == "Box Plot":
+            fig = px.box(
+                filtered_df,
+                x="Category",
+                y="Salary",
+                color="Category",
+                title="Salary Distribution by Category",
+                labels={"Salary": "Salary ($)", "Category": "Employee Category"}
+            )
 
         st.caption(" ")  # Add a small caption for spacing
         st.plotly_chart(fig, use_container_width=True)
