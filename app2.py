@@ -103,9 +103,63 @@ try:
     # Calculate average salary per category for the filtered data
     avg_salary_per_category = filtered_df.groupby("Category")["Salary"].mean().reset_index()
 
-    # Create two columns for layout (adjust the ratio)
-    col1, col2 = st.columns([3, 2])  # DataFrame takes 3/5, graph takes 2/5
+    # --- CHART SECTION ---
+    # Chart type selector
+    chart_type = st.selectbox("Select Chart Type:", ["Bar Chart", "Pie Chart", "Scatter Chart", "Histogram", "Box Plot"])
 
+    if chart_type == "Bar Chart":
+        fig = px.bar(
+            avg_salary_per_category,
+            x="Category",
+            y="Salary",
+            labels={"Category": "Employee Category", "Salary": "Average Salary ($)"},
+            title="Average Salary per Employee Category",
+            height=400  # Adjust height as needed
+        )
+    elif chart_type == "Pie Chart":
+        fig = px.pie(
+            avg_salary_per_category,
+            values="Salary",
+            names="Category",
+            title="Average Salary per Employee Category",
+            height=400  # Adjust height as needed
+        )
+    elif chart_type == "Scatter Chart":
+        # Add Age to scatter chart
+        fig = px.scatter(
+           filtered_df, # scatter charts takes the entire data frame.
+           x="Category",
+           y="Salary",
+           size="Age",
+           color="Category",
+           hover_data=['Name', 'Age', 'City'],
+           labels={"Category": "Employee Category", "Salary": "Salary ($)"},
+           title="Salary vs Category (Size: Age)",
+           height=400 # Adjust height as needed
+       )
+    elif chart_type == "Histogram":
+        fig = px.histogram(
+            filtered_df,
+            x="Salary",
+            nbins=20, # Adjust the number of bins as needed
+            title="Salary Distribution",
+            labels={"Salary": "Salary ($)"}
+        )
+    elif chart_type == "Box Plot":
+        fig = px.box(
+            filtered_df,
+            x="Category",
+            y="Salary",
+            color="Category",
+            title="Salary Distribution by Category",
+            labels={"Salary": "Salary ($)", "Category": "Employee Category"}
+        )
+
+    st.plotly_chart(fig, use_container_width=True)
+    st.caption(" ")  # Add a small caption for spacing
+
+    # --- EMPLOYEE INFORMATION SECTION ---
+    col1, col2 = st.columns([1]) # Adjust the column ratio as needed
     with col1:
         with st.expander("Employee Information", expanded=False):  # Add expander
             st.markdown("<h2 style='text-align: left;'>Employee Information</h2>", unsafe_allow_html=True)
@@ -124,60 +178,6 @@ try:
                 key='download-csv'
             )
 
-    with col2:
-        # Chart type selector
-        chart_type = st.selectbox("Select Chart Type:", ["Bar Chart", "Pie Chart", "Scatter Chart", "Histogram", "Box Plot"])
-
-        if chart_type == "Bar Chart":
-            fig = px.bar(
-                avg_salary_per_category,
-                x="Category",
-                y="Salary",
-                labels={"Category": "Employee Category", "Salary": "Average Salary ($)"},
-                title="Average Salary per Employee Category",
-                height=400  # Adjust height as needed
-            )
-        elif chart_type == "Pie Chart":
-            fig = px.pie(
-                avg_salary_per_category,
-                values="Salary",
-                names="Category",
-                title="Average Salary per Employee Category",
-                height=400  # Adjust height as needed
-            )
-        elif chart_type == "Scatter Chart":
-            # Add Age to scatter chart
-            fig = px.scatter(
-               filtered_df, # scatter charts takes the entire data frame.
-               x="Category",
-               y="Salary",
-               size="Age",
-               color="Category",
-               hover_data=['Name', 'Age', 'City'],
-               labels={"Category": "Employee Category", "Salary": "Salary ($)"},
-               title="Salary vs Category (Size: Age)",
-               height=400 # Adjust height as needed
-           )
-        elif chart_type == "Histogram":
-            fig = px.histogram(
-                filtered_df,
-                x="Salary",
-                nbins=20, # Adjust the number of bins as needed
-                title="Salary Distribution",
-                labels={"Salary": "Salary ($)"}
-            )
-        elif chart_type == "Box Plot":
-            fig = px.box(
-                filtered_df,
-                x="Category",
-                y="Salary",
-                color="Category",
-                title="Salary Distribution by Category",
-                labels={"Salary": "Salary ($)", "Category": "Employee Category"}
-            )
-
-        st.caption(" ")  # Add a small caption for spacing
-        st.plotly_chart(fig, use_container_width=True)
 
 except FileNotFoundError:
     st.error("Error: data.csv not found.")
