@@ -1,0 +1,51 @@
+Name,Age,Salary,City,Category,Department
+Alice0,41,105461,Houston,Analyst,Operations
+Pamela1,55,84234,Chicago,Manager,Engineering
+Bob2,52,104539,Dallas,Engineer,Engineering
+Quentin3,32,115835,Amsterdam,Engineer,Operations
+Steve4,38,66136,Miami,Engineer,Operations
+Rachel5,40,106150,Boston,Analyst,IT
+Nancy6,43,85597,Chicago,Analyst,Maintenance
+Pamela7,56,54841,Rome,Analyst,Marketing
+Mike8,58,108033,Tokyo,Manager,IT
+Rachel9,49,65624,Los Angeles,Engineer,Operations
+Jack10,31,112989,Chicago,Engineer,Operations
+Alice11,59,77083,Madrid,Analyst,Maintenance
+Mike12,26,104727,Chicago,Manager,Marketing
+Kevin13,23,108066,San Francisco,Analyst,Engineering
+Linda14,53,114621,Houston,Manager,IT
+Linda15,47,55990,Miami,Manager,Operations
+Mike16,28,103395,Seattle,Analyst,Maintenance
+Oscar17,38,60870,London,Manager,Marketing
+Tina18,24,69407,Sydney,Engineer,Marketing
+Alice19,31,103188,Houston,Manager,Maintenance
+Mike20,50,94285,Houston,Engineer,Marketing
+Oscar21,58,55440,Rome,Manager,Operations
+Steve22,30,77628,Houston,Manager,Marketing
+Kevin23,34,75084,Dallas,Analyst,Maintenance
+Steve24,54,81516,San Francisco,Manager,IT
+Nancy25,29,80499,Tokyo,Manager,IT
+Mike26,57,62699,Paris,Analyst,Engineering
+Bob27,32,58987,Amsterdam,Engineer,Marketing
+Rachel28,32,76358,Dallas,Manager,Operations
+Kevin29,28,113424,Chicago,Analyst,Marketing
+Jack30,51,118165,Seattle,Analyst,Maintenance
+Linda31,47,55291,Sydney,Analyst,Engineering
+Steve32,40,115114,Amsterdam,Analyst,Maintenance
+Nancy33,31,92118,Miami,Manager,IT
+Rachel34,52,77425,Amsterdam,Engineer,Marketing
+Quentin35,55,112854,Toronto,Analyst,Engineering
+Tina36,25,88347,Dallas,Analyst,IT
+Bob37,26,73841,Chicago,Engineer,Maintenance
+Oscar38,50,100352,Madrid,Manager,Maintenance
+Rachel39,28,116055,San Francisco,Analyst,Marketing
+Mike40,27,77343,Houston,Analyst,Maintenance
+Oscar41,37,98665,Rome,Analyst,Operations
+Alice42,35,64631,Toronto,Analyst,Maintenance
+Tina43,22,119153,Miami,Manager,Engineering
+Nancy44,53,75300,Los Angeles,Analyst,Maintenance
+Steve45,58,53597,Chicago,Analyst,Engineering
+Grace46,34,100038,Atlanta,Analyst,Marketing
+Pamela47,38,111443,Tokyo,Engineer,Engineering
+Nancy48,33,107030,Chicago,Manager,Maintenance
+Mike49,32,62074,New York,Manager,Engineering
