@@ -22,11 +22,13 @@ if st.session_state.dark_mode:
     text_color = "#FAFAFA"       # Light gray
     sidebar_color = "#363740"     # Slightly lighter dark gray
     accent_color = "#6495ED"      # Cornflower blue
+    button_text_color = "#FAFAFA" # Light gray button text for dark mode
 else:
     background_color = "#FFFFFF"  # White
     text_color = "#000000"       # Black
     sidebar_color = "#D4E6F1"     # Light Blue
     accent_color = "#2E86C1"      # Steel Blue
+    button_text_color = "#000000" # Black button text for light mode
 
 # --- Custom CSS for styling ---
 st.markdown(
@@ -72,6 +74,11 @@ st.markdown(
     }}
     .css-keje6w{{
         color: {text_color} !important;
+    }}
+
+    /* Style the Toggle Dark Mode button */
+    [data-testid="stSidebar"] button {{
+        color: {button_text_color} !important;
     }}
 
     </style>
