@@ -3,9 +3,10 @@ import pandas as pd
 import plotly.express as px
 import numpy as np
 import scipy.stats as stats
-from sklearn.linear_model import LinearRegression
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 from datetime import datetime, timedelta
+from prophet import Prophet  # Import Prophet
+from prophet.plot import plot_plotly, plot_components_plotly # Import plot functions
 
 # Set a wider default layout
 st.set_page_config(layout="wide")
@@ -173,51 +174,32 @@ try:
     # --- Forecasting Section ---
     st.subheader("Salary Forecasting")
 
-    # --- Feature Engineering ---
-    filtered_df['Month'] = filtered_df['Date'].dt.month
-    filtered_df['DayOfWeek'] = filtered_df['Date'].dt.dayofweek
-    filtered_df['DayOfYear'] = filtered_df['Date'].dt.dayofyear
-
-    # Prepare data for the model
-    X = filtered_df[['Month', 'DayOfWeek', 'DayOfYear']]  # Use the new features
-    y = filtered_df['Salary']
+    # --- Prepare Data for Prophet ---
+    # Prophet requires columns named 'ds' (date) and 'y' (value to forecast)
+    prophet_df = filtered_df[['Date', 'Salary']].rename(columns={'Date': 'ds', 'Salary': 'y'})
 
     # --- Model Training ---
-    model = LinearRegression()
-    model.fit(X, y)
+    model = Prophet() # instantiate the model
+    model.fit(prophet_df) # fit the model
 
-    # --- Generate Future Dates ---
-    last_date = filtered_df['Date'].max()
-    future_dates = [last_date + timedelta(days=i) for i in range(1, forecast_period + 1)]
-    future_df = pd.DataFrame({'Date': future_dates}) # creates a dataframe to perform the date operations below
-    future_df['Month'] = future_df['Date'].dt.month # extracts month
-    future_df['DayOfWeek'] = future_df['Date'].dt.dayofweek # extracts day of the week
-    future_df['DayOfYear'] = future_df['Date'].dt.dayofyear # extracts day of the year
+    # --- Make Future DataFrame ---
+    future = model.make_future_dataframe(periods=forecast_period) # number of days that we want to predict
+    forecast = model.predict(future) # predict
 
-    # --- Make Predictions ---
-    future_X = future_df[['Month', 'DayOfWeek', 'DayOfYear']]
-    forecast = model.predict(future_X)
-
-    # --- Create a DataFrame for the forecast ---
-    forecast_df = pd.DataFrame({'Date': future_dates, 'Forecasted Salary': forecast})
-
-    # --- Combine actual and forecasted data for visualization ---
-    combined_df = pd.concat([filtered_df[['Date', 'Salary']].rename(columns={'Salary': 'Actual Salary'}), forecast_df])
-
-    # --- Create the chart ---
-    fig_forecast = px.line(combined_df,
-                            x='Date',
-                            y=['Actual Salary', 'Forecasted Salary'],
-                            title=f"Salary Forecast{chart_title_suffix}",
-                            labels={'value': 'Salary'},
-                            color_discrete_sequence=['blue', 'red'])
-
+    # --- Plot Forecast ---
+    fig_forecast = plot_plotly(model, forecast)
     st.plotly_chart(fig_forecast, use_container_width=True)
 
-    # --- Evaluation Metrics ---
-    y_pred = model.predict(X)  # Get predictions on the training data
-    mae = mean_absolute_error(y, y_pred)
-    rmse = np.sqrt(mean_squared_error(y, y_pred))
+    # --- Plot Forecast Components ---
+    fig_components = plot_components_plotly(model, forecast)
+    st.plotly_chart(fig_components, use_container_width=True)
+
+    # --- Evaluation Metrics (on the training data - not ideal, but a starting point) ---
+    y_true = prophet_df['y'].values
+    y_pred = forecast['yhat'][:len(y_true)].values  # Use the same length as the actual data
+
+    mae = mean_absolute_error(y_true, y_pred)
+    rmse = np.sqrt(mean_squared_error(y_true, y_pred))
 
     st.write(f"Mean Absolute Error: {mae:.2f}")
     st.write(f"Root Mean Squared Error: {rmse:.2f}")
